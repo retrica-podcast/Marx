@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Retrica Quiz — Karl Marx</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root{--red:#c0392b;--dark-red:#7f0000;--gold:#d4a017;--cream:#f5f0e8;--dark:#1a1008;--mid:#3d2b1f;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--dark);font-family:'Crimson Pro',Georgia,serif;color:var(--cream);min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse at 20% 20%,rgba(192,57,43,.08),transparent 50%),
+             radial-gradient(ellipse at 80% 80%,rgba(127,0,0,.1),transparent 50%);}
+.wrap{position:relative;z-index:1;max-width:800px;margin:0 auto;padding:2rem 1.5rem;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+
+/* ── Logo ── */
+.logo{text-align:center;margin-bottom:2.5rem;}
+.logo-sub{font-family:'Playfair Display',serif;font-size:.85rem;font-weight:700;letter-spacing:.5em;text-transform:uppercase;color:var(--gold);opacity:.8;}
+.logo-h1{font-family:'Playfair Display',serif;font-size:clamp(2.2rem,6vw,3.5rem);font-weight:900;color:var(--cream);line-height:1;margin:.2rem 0;}
+.logo-tag{font-style:italic;color:var(--gold);opacity:.7;letter-spacing:.1em;font-size:clamp(.85rem,2vw,1rem);}
+.divider{width:120px;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:1rem auto;opacity:.6;}
+
+/* ── Card ── */
+.card{background:linear-gradient(135deg,rgba(61,43,31,.9),rgba(26,16,8,.95));border:1px solid rgba(212,160,23,.25);
+  border-radius:4px;padding:2.5rem 2rem;width:100%;max-width:640px;
+  box-shadow:0 8px 40px rgba(0,0,0,.5),inset 0 1px 0 rgba(212,160,23,.1);
+  position:relative;overflow:hidden;animation:slideIn .5s ease;}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--dark-red),var(--red),var(--gold),var(--red),var(--dark-red));}
+.card-wide{max-width:800px;}
+
+/* ── Screens ── */
+.screen{display:none;width:100%;}
+.screen.active{display:flex;flex-direction:column;align-items:center;}
+
+/* ── Typography ── */
+.stitle{font-family:'Playfair Display',serif;font-size:1.6rem;font-weight:700;color:var(--cream);text-align:center;margin-bottom:.5rem;}
+.sdesc{font-size:1.05rem;color:rgba(245,240,232,.7);text-align:center;margin-bottom:2rem;font-style:italic;}
+label{display:block;font-size:.85rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:.5rem;opacity:.8;}
+input{width:100%;padding:.9rem 1.2rem;background:rgba(245,240,232,.06);border:1px solid rgba(212,160,23,.3);
+  border-radius:3px;color:var(--cream);font-family:'Crimson Pro',serif;font-size:1.1rem;
+  outline:none;margin-bottom:1.5rem;transition:border-color .2s,background .2s;}
+input:focus{border-color:var(--gold);background:rgba(212,160,23,.08);}
+
+/* ── Buttons ── */
+.btn{display:inline-block;padding:.85rem 2.2rem;border:none;border-radius:3px;cursor:pointer;
+  font-family:'Playfair Display',serif;font-size:1rem;font-weight:700;letter-spacing:.05em;transition:all .2s;text-align:center;}
+.btn-p{background:linear-gradient(135deg,var(--red),var(--dark-red));color:var(--cream);box-shadow:0 3px 15px rgba(192,57,43,.4);width:100%;}
+.btn-p:hover{background:linear-gradient(135deg,#e74c3c,var(--red));transform:translateY(-1px);}
+.btn-s{background:transparent;color:var(--gold);border:1px solid rgba(212,160,23,.4);font-size:.85rem;padding:.6rem 1.5rem;}
+.btn-s:hover{background:rgba(212,160,23,.1);}
+.btn-y{flex:1;background:linear-gradient(135deg,#27ae60,#1a7a40);color:#fff;font-size:1.1rem;padding:1rem;}
+.btn-y:hover{background:linear-gradient(135deg,#2ecc71,#27ae60);transform:translateY(-1px);}
+.btn-n{flex:1;background:linear-gradient(135deg,var(--red),var(--dark-red));color:#fff;font-size:1.1rem;padding:1rem;}
+.btn-n:hover{background:linear-gradient(135deg,#e74c3c,var(--red));transform:translateY(-1px);}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important;}
+
+/* ── Progress & question ── */
+.pbar{width:100%;height:4px;background:rgba(245,240,232,.1);border-radius:2px;margin-bottom:2rem;overflow:hidden;}
+.pfill{height:100%;background:linear-gradient(90deg,var(--dark-red),var(--red),var(--gold));transition:width .4s ease;}
+.qcount{font-size:.8rem;letter-spacing:.15em;text-transform:uppercase;color:var(--gold);opacity:.7;text-align:center;margin-bottom:.8rem;}
+.qtext{font-family:'Playfair Display',serif;font-size:clamp(1.1rem,3vw,1.35rem);color:var(--cream);text-align:center;
+  line-height:1.6;margin-bottom:2rem;padding:.5rem 1rem;position:relative;}
+.qtext::before,.qtext::after{font-family:'Playfair Display',serif;font-size:3rem;color:var(--red);opacity:.3;position:absolute;line-height:1;}
+.qtext::before{content:'\201C';top:-.3rem;left:0;}
+.qtext::after{content:'\201D';bottom:-1.2rem;right:0;}
+.abtn{display:flex;gap:1rem;width:100%;margin-top:1rem;}
+
+/* ── Feedback ── */
+.fb{text-align:center;padding:1.5rem;border-radius:3px;margin-top:1rem;width:100%;animation:fadeIn .3s ease;}
+.fb.ok{background:rgba(39,174,96,.15);border:1px solid rgba(39,174,96,.4);}
+.fb.no{background:rgba(192,57,43,.15);border:1px solid rgba(192,57,43,.4);}
+.fb-icon{font-size:2rem;margin-bottom:.5rem;}
+.fb-txt{font-size:1.05rem;color:var(--cream);}
+.fb-ex{font-size:.9rem;color:rgba(245,240,232,.6);margin-top:.3rem;font-style:italic;}
+
+/* ── Score screen ── */
+.scircle{width:130px;height:130px;border-radius:50%;border:3px solid var(--gold);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  margin:0 auto 1.5rem;background:radial-gradient(circle,rgba(212,160,23,.1),transparent);
+  box-shadow:0 0 30px rgba(212,160,23,.2);}
+.snum{font-family:'Playfair Display',serif;font-size:2.8rem;font-weight:900;color:var(--gold);line-height:1;}
+.slbl{font-size:.75rem;letter-spacing:.1em;text-transform:uppercase;color:rgba(212,160,23,.6);}
+.smsg{font-family:'Playfair Display',serif;font-size:1.4rem;text-align:center;color:var(--cream);margin-bottom:.5rem;}
+.ssub{font-style:italic;color:rgba(245,240,232,.6);text-align:center;margin-bottom:2rem;font-size:.95rem;}
+
+/* ── Moderator ── */
+.mhdr{display:flex;justify-content:space-between;align-items:center;width:100%;margin-bottom:1.5rem;flex-wrap:wrap;gap:.5rem;}
+.mtitle{font-family:'Playfair Display',serif;font-size:1.4rem;color:var(--gold);}
+.live{display:inline-flex;align-items:center;gap:.4rem;font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;color:#2ecc71;}
+.live::before{content:'';width:8px;height:8px;border-radius:50%;background:#2ecc71;animation:pulse 1.5s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
+
+table.sb{width:100%;border-collapse:collapse;}
+table.sb th{font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);opacity:.7;
+  padding:.5rem .8rem;text-align:left;border-bottom:1px solid rgba(212,160,23,.2);}
+table.sb td{padding:.75rem .8rem;border-bottom:1px solid rgba(245,240,232,.05);font-size:1rem;color:var(--cream);}
+table.sb tr:last-child td{border-bottom:none;}
+table.sb tr:hover td{background:rgba(212,160,23,.04);}
+
+.rb{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;
+  font-size:.75rem;font-weight:700;background:rgba(212,160,23,.15);color:var(--gold);border:1px solid rgba(212,160,23,.3);}
+.rb.g{background:var(--gold);color:var(--dark);border-color:var(--gold);}
+.rb.s{background:#b0b0b0;color:var(--dark);border-color:#b0b0b0;}
+.rb.b{background:#cd7f32;color:var(--dark);border-color:#cd7f32;}
+
+.sp{display:inline-block;padding:.2rem .7rem;border-radius:20px;font-size:.75rem;letter-spacing:.05em;}
+.sp.play{background:rgba(52,152,219,.2);color:#74b9ff;border:1px solid rgba(52,152,219,.3);}
+.sp.done{background:rgba(39,174,96,.15);color:#55efc4;border:1px solid rgba(39,174,96,.3);}
+
+/* progress mini bar in mod table */
+.mini-bar{width:80px;height:6px;background:rgba(245,240,232,.1);border-radius:3px;display:inline-block;vertical-align:middle;overflow:hidden;}
+.mini-fill{height:100%;background:linear-gradient(90deg,var(--red),var(--gold));border-radius:3px;transition:width .3s;}
+
+.empty{text-align:center;padding:3rem;color:rgba(245,240,232,.3);font-style:italic;}
+.pwerr{color:var(--red);font-size:.85rem;margin-top:-.8rem;margin-bottom:1rem;text-align:center;font-style:italic;display:none;}
+.modlnk{margin-top:2rem;text-align:center;}
+.modlnk a{color:var(--gold);opacity:.5;text-decoration:none;font-size:.8rem;}
+.modlnk a:hover{opacity:1;}
+.marx-q{font-style:italic;color:rgba(245,240,232,.3);font-size:.85rem;text-align:center;margin-top:2rem;line-height:1.6;}
+.sync-row{display:flex;align-items:center;justify-content:space-between;margin-top:1.2rem;flex-wrap:wrap;gap:.5rem;}
+.sync-info{font-size:.78rem;color:rgba(245,240,232,.3);font-style:italic;}
+.mod-actions{display:flex;gap:.8rem;flex-wrap:wrap;}
+
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Logo -->
+  <div class="logo">
+    <div class="logo-sub">Retrica Podcast</div>
+    <div class="logo-h1">Karl Marx Quiz</div>
+    <div class="logo-tag">Van wie is deze stelling?</div>
+    <div class="divider"></div>
+  </div>
+
+  <!-- ① Naam -->
+  <div id="sname" class="screen active" style="width:100%;max-width:640px;">
+    <div class="card">
+      <div class="stitle">Wie ben jij?</div>
+      <div class="sdesc">Vul je naam in voor je begint</div>
+      <label>Jouw naam</label>
+      <input type="text" id="pname" placeholder="Voornaam Achternaam" autocomplete="off">
+      <button class="btn btn-p" onclick="startQuiz()">Speel mee →</button>
+      <div class="marx-q">"Philosophers have only interpreted the world.<br>The point, however, is to change it." — K. Marx</div>
+    </div>
+    <div class="modlnk"><a href="#" onclick="showModLogin()">Moderator? Klik hier</a></div>
+  </div>
+
+  <!-- ② Mod login -->
+  <div id="smodlogin" class="screen" style="width:100%;max-width:640px;">
+    <div class="card">
+      <div class="stitle">Moderator toegang</div>
+      <div class="sdesc">Voer het wachtwoord in</div>
+      <label>Wachtwoord</label>
+      <input type="password" id="mpw" placeholder="••••••••">
+      <div class="pwerr" id="pwerr">Fout wachtwoord. Probeer opnieuw.</div>
+      <button class="btn btn-p" onclick="checkMod()">Toegang</button>
+      <div style="text-align:center;margin-top:1rem;"><button class="btn btn-s" onclick="show('sname')">← Terug</button></div>
+    </div>
+  </div>
+
+  <!-- ③ Quiz -->
+  <div id="squiz" class="screen" style="width:100%;max-width:640px;">
+    <div class="card">
+      <div class="pbar"><div class="pfill" id="pfill" style="width:0%"></div></div>
+      <div class="qcount" id="qcount">Vraag 1 / 10</div>
+      <div class="qtext" id="qtext">Laden...</div>
+      <div id="fba"></div>
+      <div class="abtn">
+        <button class="btn btn-y" id="byes" onclick="answer(true)">✓ Karl Marx</button>
+        <button class="btn btn-n" id="bno"  onclick="answer(false)">✗ Niet Marx</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ④ Score -->
+  <div id="sscore" class="screen" style="width:100%;max-width:640px;">
+    <div class="card">
+      <div class="scircle">
+        <div class="snum" id="fscore">0</div>
+        <div class="slbl">/ 10</div>
+      </div>
+      <div class="smsg" id="smsg">Goed gedaan!</div>
+      <div class="ssub" id="ssub">Je hebt de quiz voltooid.</div>
+      <button class="btn btn-p" onclick="restart()">Opnieuw spelen →</button>
+    </div>
+  </div>
+
+  <!-- ⑤ Moderator dashboard -->
+  <div id="smod" class="screen" style="width:100%;max-width:800px;">
+    <div class="card card-wide">
+      <div class="mhdr">
+        <div class="mtitle">📊 Moderatordashboard</div>
+        <div class="live" id="liveDot">Live</div>
+      </div>
+
+      <table class="sb">
+        <thead>
+          <tr>
+            <th style="width:42px">#</th>
+            <th>Naam</th>
+            <th style="width:90px">Score</th>
+            <th style="width:130px">Voortgang</th>
+            <th style="width:100px">Status</th>
+          </tr>
+        </thead>
+        <tbody id="mtb">
+          <tr><td colspan="5"><div class="empty">Wacht op spelers…</div></td></tr>
+        </tbody>
+      </table>
+
+      <div class="sync-row">
+        <div class="sync-info" id="syncInfo">Verbinding controleren…</div>
+        <div class="mod-actions">
+          <button class="btn btn-s" onclick="clearAll()" style="font-size:.78rem;padding:.45rem 1rem;">🗑 Wissen</button>
+          <button class="btn btn-s" onclick="show('sname')" style="font-size:.78rem;padding:.45rem 1rem;">← Terug</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /wrap -->
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  QUESTIONS
+// ═══════════════════════════════════════════════════════════
+const QS=[
+  {t:"Religie is de opium van het volk.",m:true,e:"Een van de bekendste uitspraken van Marx, uit zijn 'Bijdrage aan de Kritiek van Hegels Rechtsfilosofie' (1844)."},
+  {t:"God is een projectie van de menselijke geest — niet andersom.",m:false,e:"Dit is een idee van Ludwig Feuerbach. Marx bouwde hierop voort, maar het is niet van hem."},
+  {t:"Religie is de zucht van het onderdrukte schepsel, het hart van een harteloze wereld.",m:true,e:"Dit citaat is van Marx en maakt deel uit van zijn bredere religiekritiek."},
+  {t:"De geschiedenis van alle samenlevingen tot nu toe is de geschiedenis van klassenstrijd.",m:true,e:"De openingszin van het Communistisch Manifest (1848), door Marx en Engels."},
+  {t:"Het zijn niet de goden of de wetten die de mensen onderdrukken, maar de mensen zelf.",m:false,e:"Dit is eerder een anarchistische gedachte, dicht bij Michail Bakoenin — de vijand van Marx."},
+  {t:"Filosofen hebben de wereld tot nu toe alleen geïnterpreteerd. Het gaat erom haar te veranderen.",m:true,e:"De beroemde 11e these over Feuerbach van Marx."},
+  {t:"Arbeiders raken vervreemd van het product dat ze maken, omdat het eigendom wordt van de kapitalist.",m:true,e:"Het concept van vervreemding (Entfremdung) is een kernidee van Marx."},
+  {t:"De vrije markt zorgt vanzelf voor welvaart voor iedereen als de overheid zich er niet mee bemoeit.",m:false,e:"Dit is liberale/kapitalistische gedachte — het tegenovergestelde van Marx' kritiek."},
+  {t:"De bourgeoisie bezit de productiemiddelen; het proletariaat bezit enkel zijn arbeidskracht.",m:true,e:"Een fundamentele analyse van Marx over de klassenstructuur in het kapitalisme."},
+  {t:"Religie troost mensen in een harde wereld, maar neemt de échte oorzaken van hun lijden niet weg.",m:true,e:"De kern van Marx' opiummetafoor: religie is een pijnstiller, geen genezing."},
+  {t:"Eigendom is diefstal.",m:false,e:"Een uitspraak van anarchist Pierre-Joseph Proudhon, niet van Marx."},
+  {t:"De meerwaarde die arbeiders creëren, wordt door de kapitalist ingepikt als winst.",m:true,e:"De meerwaardetheorie is een van de centrale economische ideeën uit Das Kapital."},
+  {t:"Sociale media van vandaag vervullen dezelfde verdovende functie als religie deed in de 19e eeuw.",m:false,e:"Een hedendaagse toepassing van Marx' ideeën, maar niet van Marx zelf."},
+  {t:"Het christendom kan mensen net aanzetten tot actie tegen onrecht, in plaats van hen passief te maken.",m:false,e:"Dit is een van de christelijke tegenargumenten op Marx' religiekritiek."},
+  {t:"In een communistische samenleving verdwijnen klassenverschillen en werken mensen samen zonder uitbuiting.",m:true,e:"Het einddoel zoals Marx het voor ogen had in zijn historisch-materialistische visie."},
+  {t:"Loon is de prijs die de kapitalist betaalt voor het gebruik van de arbeidskracht van de arbeider.",m:true,e:"Marx beschreef het loon als de prijs van arbeidskracht in het kapitalistische systeem."},
+  {t:"Religie gaat in de eerste plaats over zingeving en relatie met God — dat kan je niet reduceren tot materiële omstandigheden.",m:false,e:"Dit is het christelijke antwoord op Marx, niet zijn eigen standpunt."},
+  {t:"Mensen hebben van nature de neiging om samen te leven en zijn van nature politiek.",m:false,e:"Dit is een idee van Aristoteles uit de Oudheid, niet van Marx."},
+  {t:"De staat is een instrument waarmee de heersende klasse haar macht over de andere klassen uitoefent.",m:true,e:"Marx zag de staat als uitdrukking van de belangen van de bourgeoisie."},
+  {t:"Als de maatschappelijke omstandigheden verbeteren, hebben mensen geen religieuze illusies meer nodig.",m:true,e:"De kern van Marx' alternatief voor religie: een rechtvaardige samenleving maakt religie overbodig."},
+  {t:"Het kapitalisme zal zichzelf uiteindelijk vernietigen door zijn eigen interne tegenstellingen.",m:true,e:"Marx geloofde in de onvermijdelijke ineenstorting van het kapitalisme door crisissen en klassenstrijd."},
+  {t:"Gig-economie biedt platformwerkers echte vrijheid en autonomie doordat ze hun eigen baas zijn.",m:false,e:"Dit is de ideologische framing van de gig-economie — Marxistische analyse noemt dit vervreemding."},
+  {t:"Religie functioneert als een ideologie die het bestaande sociale systeem in stand houdt.",m:true,e:"Marx analyseerde religie als onderdeel van de bovenbouw die de economische basis versterkt."},
+  {t:"De arbeidsklasse moet de productiemiddelen in handen nemen om een eerlijke samenleving te creëren.",m:true,e:"De politieke conclusie van Marx: de revolutionaire overgang naar socialisme."},
+  {t:"Rijkdom van landen hangt af van de arbeidsverdeling en de vrije handel tussen naties.",m:false,e:"Dit zijn ideeën van Adam Smith — precies het kapitalistische denken dat Marx bekritiseerde."}
+];
+
+// ═══════════════════════════════════════════════════════════
+//  API helpers  (praten met server.py op zelfde host)
+// ═══════════════════════════════════════════════════════════
+const BASE = "";   // zelfde origin als de server
+
+async function apiPost(path, body){
+  const r = await fetch(BASE+path,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+  return r.json();
+}
+async function apiGet(path){
+  const r = await fetch(BASE+path);
+  return r.json();
+}
+
+// ═══════════════════════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════════════════════
+let playerName="", currentQs=[], qIdx=0, score=0, answered=false;
+
+// ═══════════════════════════════════════════════════════════
+//  UTILS
+// ═══════════════════════════════════════════════════════════
+function show(id){document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));document.getElementById(id).classList.add("active");}
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function modActive(){return document.getElementById("smod").classList.contains("active");}
+
+function pushScore(status){
+  apiPost("/api/score",{name:playerName,score,progress:qIdx,status}).catch(()=>{});
+}
+
+// ═══════════════════════════════════════════════════════════
+//  QUIZ
+// ═══════════════════════════════════════════════════════════
+function startQuiz(){
+  const n=document.getElementById("pname").value.trim();
+  if(!n){document.getElementById("pname").focus();return;}
+  playerName=n;
+  currentQs=[...QS].sort(()=>Math.random()-.5).slice(0,10);
+  qIdx=0;score=0;answered=false;
+  pushScore("playing");
+  show("squiz");
+  renderQ();
+}
+
+function renderQ(){
+  const q=currentQs[qIdx];
+  document.getElementById("qcount").textContent=`Vraag ${qIdx+1} / 10`;
+  document.getElementById("qtext").textContent=q.t;
+  document.getElementById("fba").innerHTML="";
+  document.getElementById("pfill").style.width=`${(qIdx/10)*100}%`;
+  document.getElementById("byes").disabled=false;
+  document.getElementById("bno").disabled=false;
+  answered=false;
+}
+
+function answer(isMarx){
+  if(answered)return;
+  answered=true;
+  const q=currentQs[qIdx];
+  const ok=(isMarx===q.m);
+  if(ok)score++;
+  document.getElementById("byes").disabled=true;
+  document.getElementById("bno").disabled=true;
+  qIdx++;
+  pushScore("playing");
+  document.getElementById("fba").innerHTML=`
+    <div class="fb ${ok?"ok":"no"}">
+      <div class="fb-icon">${ok?"✓":"✗"}</div>
+      <div class="fb-txt">${ok?"Juist!":"Fout!"} — Dit is ${q.m?"wél":"níet"} van Karl Marx.</div>
+      <div class="fb-ex">${esc(q.e)}</div>
+    </div>`;
+  setTimeout(()=>{
+    if(qIdx>=10)showResults();else renderQ();
+  },2200);
+}
+
+function showResults(){
+  pushScore("done");
+  document.getElementById("pfill").style.width="100%";
+  document.getElementById("fscore").textContent=score;
+  const rows=[[9,"Uitstekend!","Je kent Marx als geen ander!"],[7,"Goed gedaan!","Je snapt de ideeën van Marx goed."],[5,"Niet slecht!","Herlees de leerstof nog eens."],[0,"Nog wat werk aan.","Luister de podcast nog eens terug."]];
+  const[,m,s]=rows.find(([min])=>score>=min);
+  document.getElementById("smsg").textContent=m;
+  document.getElementById("ssub").textContent=`${s} (${score}/10)`;
+  show("sscore");
+}
+
+function restart(){document.getElementById("pname").value="";show("sname");}
+
+// ═══════════════════════════════════════════════════════════
+//  MODERATOR
+// ═══════════════════════════════════════════════════════════
+function showModLogin(){
+  document.getElementById("mpw").value="";
+  document.getElementById("pwerr").style.display="none";
+  show("smodlogin");
+}
+
+function checkMod(){
+  if(document.getElementById("mpw").value==="RetRica"){
+    show("smod");
+    startMod();
+  }else{
+    document.getElementById("pwerr").style.display="block";
+    document.getElementById("mpw").value="";
+  }
+}
+
+let modTimer=null;
+
+function startMod(){
+  pollScores();
+  clearInterval(modTimer);
+  modTimer=setInterval(pollScores,2000);
+}
+
+async function pollScores(){
+  try{
+    const players=await apiGet("/api/scores");
+    renderMod(players);
+    const t=new Date().toLocaleTimeString("nl-BE");
+    document.getElementById("syncInfo").textContent=`Laatste update: ${t}`;
+    document.getElementById("liveDot").textContent="Live";
+    document.getElementById("liveDot").style.color="#2ecc71";
+  }catch(e){
+    document.getElementById("syncInfo").textContent="⚠ Geen verbinding met de server";
+    document.getElementById("liveDot").textContent="Offline";
+    document.getElementById("liveDot").style.color="#e74c3c";
+  }
+}
+
+function renderMod(players){
+  const tb=document.getElementById("mtb");
+  if(!players||!players.length){
+    tb.innerHTML='<tr><td colspan="5"><div class="empty">Geen spelers actief. Wacht tot leerlingen beginnen.</div></td></tr>';
+    return;
+  }
+  tb.innerHTML=players.map((p,i)=>{
+    const r=i+1;
+    const bc=r===1?"g":r===2?"s":r===3?"b":"";
+    const prog=p.status==="done"?10:(p.progress||0);
+    const pct=Math.round((prog/10)*100);
+    const badge=p.status==="done"
+      ?'<span class="sp done">✓ Klaar</span>'
+      :'<span class="sp play">▶ Bezig</span>';
+    const scoreDisplay=p.status==="done"
+      ?`<strong style="color:var(--gold)">${p.score}/10</strong>`
+      :`${p.score}`;
+    return`<tr>
+      <td><span class="rb ${bc}">${r}</span></td>
+      <td>${esc(p.name)}</td>
+      <td style="font-family:'Playfair Display',serif;font-size:1.1rem;">${scoreDisplay}</td>
+      <td>
+        <span class="mini-bar"><span class="mini-fill" style="width:${pct}%"></span></span>
+        <span style="font-size:.8rem;color:rgba(245,240,232,.5);margin-left:6px;">${prog}/10</span>
+      </td>
+      <td>${badge}</td>
+    </tr>`;
+  }).join("");
+}
+
+async function clearAll(){
+  if(!confirm("Wil je alle scores wissen? Dit kan niet ongedaan worden."))return;
+  await apiPost("/api/clear",{});
+  pollScores();
+}
+
+// ─── keyboard shortcuts ───────────────────────────────────
+document.getElementById("pname").addEventListener("keydown",e=>{if(e.key==="Enter")startQuiz();});
+document.getElementById("mpw").addEventListener("keydown",e=>{if(e.key==="Enter")checkMod();});
+</script>
+</body>
+</html>
